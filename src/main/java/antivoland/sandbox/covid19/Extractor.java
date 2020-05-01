@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static java.lang.String.format;
-
 /**
  * @author antivoland
  */
@@ -18,12 +16,56 @@ public class Extractor {
     private static final Logger LOGGER = LoggerFactory.getLogger(Extractor.class);
 
     public static void main(String[] args) throws IOException {
+        // todo: create configuration
         Document document = Jsoup.connect("https://ru.wikipedia.org/wiki/Хронология_распространения_COVID-19_в_России").get();
-        LOGGER.info(format("Title: %s", document.title()));
-
         Elements tables = document.select("table.wikitable");
         for (Element table : tables) {
-            // todo: parse and export to csv;
+            new Table(table);
+            // todo: export to csv
+        }
+    }
+
+    static class Table {
+        final String[][] cells;
+
+        Table(Element table) {
+            int height = table.select("tr").size();
+            cells = new String[height][];
+            for (Element row : table.select("tr")) {
+                row.select("th,td").stream().map(Table::cleanup).map(Cell::new).forEach(cell -> {
+                    // todo: implement
+                });
+            }
+        }
+
+        static Element cleanup(Element cell) {
+            cell.select(".collapseButton").remove();
+            cell.select("a").forEach(link -> {
+                if (link.attr("href").startsWith("#")) {
+                    link.remove();
+                }
+            });
+            return cell;
+        }
+    }
+
+    static class Cell {
+        final String text;
+        final int width;
+        final int height;
+
+        Cell(Element cell) {
+            text = cell.text();
+            width = parseInt(cell.attr("colspan"));
+            height = parseInt(cell.attr("rowspan"));
+        }
+
+        static int parseInt(String value) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
         }
     }
 }
