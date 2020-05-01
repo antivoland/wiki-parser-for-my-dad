@@ -1,9 +1,18 @@
 package antivoland.wiki.model;
 
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.TreeMap;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author antivoland
@@ -35,6 +44,24 @@ public class Table {
             rows.put(row, new Row());
         }
         return rows.get(row);
+    }
+
+    public void export(Path path) throws IOException {
+        if (rows.isEmpty()) {
+            return;
+        }
+        if (!Files.exists(path)) {
+            Files.createDirectories(path);
+        }
+
+        List<List<String>> table = rows.values().stream().map(row ->
+                row.cells.values().stream().map(cell -> cell.text).collect(toList())).collect(toList());
+
+        Path file = path.resolve(row(0).firstCell().text + ".csv");
+        CsvMapper mapper = new CsvMapper();
+        CsvSchema schema = mapper.schemaFor(List.class).withColumnSeparator(';');
+        ObjectWriter writer = mapper.writer(schema);
+        writer.writeValue(file.toFile(), table);
     }
 
     private static void cleanupCell(Element cell) {

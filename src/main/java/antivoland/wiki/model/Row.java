@@ -5,10 +5,14 @@ import java.util.TreeMap;
 /**
  * @author antivoland
  */
-public class Row {
-    private final TreeMap<Integer, Cell> cells = new TreeMap<>();
+class Row {
+    final TreeMap<Integer, Cell> cells = new TreeMap<>();
 
-    public void set(int column, Cell cell) {
+    Cell firstCell() {
+        return cells.get(0);
+    }
+
+    void set(int column, Cell cell) {
         cells.put(column, cell);
     }
 
