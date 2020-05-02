@@ -19,8 +19,9 @@ import static java.util.stream.Collectors.toList;
  */
 public class Table {
     private final TreeMap<Integer, Row> rows = new TreeMap<>();
+    private final int no;
 
-    public Table(Element table) {
+    public Table(Element table, int no) {
         Elements rows = table.select("tr");
         for (int row = 0; row < rows.size(); ++row) {
             for (Element cell : rows.get(row).select("th,td")) {
@@ -28,6 +29,19 @@ public class Table {
                 add(row, new Cell(cell));
             }
         }
+        this.no = no;
+    }
+
+    public int no() {
+        return no;
+    }
+
+    public String name() {
+        Cell cell = row(0).firstCell();
+        if (cell == null) {
+            return "table" + no;
+        }
+        return cell.text;
     }
 
     private void add(int row, Cell cell) {
@@ -57,7 +71,7 @@ public class Table {
         List<List<String>> table = rows.values().stream().map(row ->
                 row.cells.values().stream().map(cell -> cell.text).collect(toList())).collect(toList());
 
-        Path file = path.resolve(row(0).firstCell().text + ".csv");
+        Path file = path.resolve(name() + ".csv");
         CsvMapper mapper = new CsvMapper();
         CsvSchema schema = mapper.schemaFor(List.class).withColumnSeparator(';');
         ObjectWriter writer = mapper.writer(schema);
