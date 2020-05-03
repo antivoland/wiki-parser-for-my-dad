@@ -15,7 +15,7 @@ chcp 65001
 title Wiki Extractor v$VERSION
 color 71
 cls
-java -jar extractor-0.1.0.jar
+java -jar extractor-$VERSION.jar
 pause
 EOT
 
