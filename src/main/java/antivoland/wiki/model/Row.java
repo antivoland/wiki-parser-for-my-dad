@@ -1,6 +1,9 @@
 package antivoland.wiki.model;
 
+import java.util.List;
 import java.util.TreeMap;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author antivoland
@@ -26,5 +29,9 @@ class Row {
             }
         }
         return cells.lastKey() + 1;
+    }
+
+    List<String> cellValues() {
+        return cells.values().stream().map(cell -> cell.text).collect(toList());
     }
 }

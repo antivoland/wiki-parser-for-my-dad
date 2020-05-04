@@ -1,18 +1,13 @@
 package antivoland.wiki.model;
 
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import antivoland.wiki.CsvWriter;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.TreeMap;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author antivoland
@@ -38,10 +33,12 @@ public class Table {
 
     public String name() {
         Cell cell = row(0).firstCell();
-        if (cell == null) {
+        if (cell == null || cell.text == null) {
             return "table" + no;
         }
-        return cell.text;
+
+        String name = cell.text.replaceAll("[^\\s\\p{IsAlphabetic}\\p{IsDigit}]", "");
+        return name.isEmpty() ? "table" + no : name;
     }
 
     private void add(int row, Cell cell) {
@@ -67,15 +64,11 @@ public class Table {
         if (!Files.exists(path)) {
             Files.createDirectories(path);
         }
-
-        List<List<String>> table = rows.values().stream().map(row ->
-                row.cells.values().stream().map(cell -> cell.text).collect(toList())).collect(toList());
-
-        Path file = path.resolve(name() + ".csv");
-        CsvMapper mapper = new CsvMapper();
-        CsvSchema schema = mapper.schemaFor(List.class).withColumnSeparator(';');
-        ObjectWriter writer = mapper.writer(schema);
-        writer.writeValue(file.toFile(), table);
+        try (CsvWriter writer = new CsvWriter(path.resolve(name() + ".csv"), ';')) {
+            for (Row row : rows.values()) {
+                writer.write(row.cellValues());
+            }
+        }
     }
 
     private static void cleanupCell(Element cell) {
