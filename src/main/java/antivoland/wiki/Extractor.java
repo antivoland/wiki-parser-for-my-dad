@@ -61,18 +61,19 @@ public class Extractor {
     }
 
     public static void reset(Path path) throws IOException {
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
-            return;
+        if (Files.exists(path)) {
+            Files.walk(path).sorted(reverseOrder()).forEach(leaf -> {
+                if (Files.isDirectory(leaf) || !leaf.endsWith(".csv")) {
+                    return;
+                }
+                try {
+                    Files.delete(leaf);
+                } catch (IOException e) {
+                    LOGGER.error(format("Failed to delete '%s'", leaf), e);
+                    throw new RuntimeException(format("Failed to delete '%s'", leaf), e);
+                }
+            });
         }
-        Files.walk(path).sorted(reverseOrder()).forEach(leaf -> {
-            try {
-                Files.delete(leaf);
-            } catch (IOException e) {
-                LOGGER.error(format("Failed to delete '%s'", leaf), e);
-                throw new RuntimeException(format("Failed to delete '%s'", leaf), e);
-            }
-        });
         Files.createDirectories(path.resolve("segments"));
     }
 }
