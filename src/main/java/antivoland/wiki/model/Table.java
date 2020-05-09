@@ -1,13 +1,22 @@
 package antivoland.wiki.model;
 
-import antivoland.wiki.CsvWriter;
+import antivoland.wiki.Config;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
+
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 /**
  * @author antivoland
@@ -57,20 +66,6 @@ public class Table {
         return rows.get(row);
     }
 
-    public void export(Path path) throws IOException {
-        if (rows.isEmpty()) {
-            return;
-        }
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
-        }
-        try (CsvWriter writer = new CsvWriter(path.resolve(name() + ".csv"), ';')) {
-            for (Row row : rows.values()) {
-                writer.write(row.cellValues());
-            }
-        }
-    }
-
     private static void cleanupCell(Element cell) {
         cell.select(".collapseButton").remove();
         cell.select("a").forEach(link -> {
@@ -78,5 +73,35 @@ public class Table {
                 link.remove();
             }
         });
+    }
+
+    public static class Exporter {
+        private static final CsvMapper MAPPER = new CsvMapper();
+
+        private final ObjectWriter writer;
+        private final String encoding;
+
+        public Exporter(Config config) {
+            writer = MAPPER.writer(schema(config));
+            encoding = config.encoding;
+        }
+
+        public void export(Table table, Path path) throws IOException {
+            if (table.rows.isEmpty()) {
+                return;
+            }
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+            }
+            List<String> serialized = new ArrayList<>(table.rows.size());
+            for (Row row : table.rows.values()) {
+                serialized.add(writer.writeValueAsString(row.cellValues()));
+            }
+            Files.write(path.resolve(table.name() + ".csv"), serialized, Charset.forName(encoding), WRITE, CREATE);
+        }
+
+        private static CsvSchema schema(Config config) {
+            return MAPPER.schemaFor(List.class).withColumnSeparator(config.separator);
+        }
     }
 }

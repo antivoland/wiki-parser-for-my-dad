@@ -19,6 +19,8 @@ import static java.lang.String.format;
 public class Config {
     private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
 
+    public char separator;
+    public String encoding;
     public List<Profile> profiles;
 
     public static class Profile {

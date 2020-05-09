@@ -24,11 +24,12 @@ public class Extractor {
         LOGGER.info(format("Application path: %s", appPath()));
 
         Config config = Config.read();
+        Table.Exporter exporter = new Table.Exporter(config);
         for (Config.Profile profile : config.profiles) {
             Path outPath = appPath().resolve(profile.outPath);
             tables(profile.inUrl).forEach(table -> {
                 try {
-                    table.export(outPath);
+                    exporter.export(table, outPath);
                 } catch (IOException e) {
                     LOGGER.warn(format("Failed to export table #%s ('%s') from '%s'",
                             table.no(), table.name(), profile.inUrl));
