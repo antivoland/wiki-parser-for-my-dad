@@ -98,7 +98,7 @@ public class Table {
         }
 
         private static CsvSchema schema(Config config) {
-            return MAPPER.schemaFor(List.class).withColumnSeparator(config.separator);
+            return MAPPER.schemaFor(List.class).withColumnSeparator(config.separator).withLineSeparator("");
         }
     }
 }

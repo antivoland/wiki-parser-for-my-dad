@@ -63,7 +63,7 @@ public class Extractor {
     public static void reset(Path path) throws IOException {
         if (Files.exists(path)) {
             Files.walk(path).sorted(reverseOrder()).forEach(leaf -> {
-                if (Files.isDirectory(leaf) || !leaf.endsWith(".csv")) {
+                if (Files.isDirectory(leaf) || !leaf.getFileName().toString().endsWith(".csv")) {
                     return;
                 }
                 try {
