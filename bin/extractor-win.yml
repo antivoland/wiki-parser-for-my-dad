@@ -1,0 +1,19 @@
+separator: ;
+encoding: windows-1251
+profiles:
+  - inUrl: https://ru.wikipedia.org/wiki/Хронология_распространения_COVID-19
+    outPath: all
+  - inUrl: https://ru.wikipedia.org/wiki/Хронология_распространения_COVID-19_в_России
+    outPath: russia
+  - inUrl: https://ru.wikipedia.org/wiki/Хронология_распространения_COVID-19_в_странах_Европейского_региона
+    outPath: europe
+  - inUrl: https://ru.wikipedia.org/wiki/Хронология_распространения_COVID-19_в_странах_Американского_региона
+    outPath: america
+  - inUrl: https://ru.wikipedia.org/wiki/Хронология_распространения_COVID-19_в_странах_Африканского_региона
+    outPath: africa
+  - inUrl: https://ru.wikipedia.org/wiki/Хронология_распространения_COVID-19_в_странах_региона_Юго-Восточной_Азии
+    outPath: south-east-asia
+  - inUrl: https://ru.wikipedia.org/wiki/Хронология_распространения_COVID-19_в_странах_Восточно-Средиземноморского_региона
+    outPath: eastern-mediterranean
+  - inUrl: https://ru.wikipedia.org/wiki/Хронология_распространения_COVID-19_в_странах_региона_западной_части_Тихого_океана
+    outPath: western-pacific

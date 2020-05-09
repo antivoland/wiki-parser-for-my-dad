@@ -7,12 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static antivoland.wiki.Utils.appPath;
 import static java.lang.String.format;
+import static java.util.Comparator.reverseOrder;
 
 /**
  * @author antivoland
@@ -27,6 +29,12 @@ public class Extractor {
         Table.Exporter exporter = new Table.Exporter(config);
         for (Config.Profile profile : config.profiles) {
             Path outPath = appPath().resolve(profile.outPath);
+            try {
+                reset(outPath);
+            } catch (IOException e) {
+                LOGGER.error(format("Failed to cleanup directory '%s'", outPath), e);
+                throw new RuntimeException(format("Failed to cleanup directory '%s'", outPath), e);
+            }
             tables(profile.inUrl).forEach(table -> {
                 try {
                     exporter.export(table, outPath);
@@ -50,5 +58,21 @@ public class Extractor {
         }
         return document.select("table.wikitable").stream()
                 .map(table -> new Table(table, no.incrementAndGet()));
+    }
+
+    public static void reset(Path path) throws IOException {
+        if (!Files.exists(path)) {
+            Files.createDirectories(path);
+            return;
+        }
+        Files.walk(path).sorted(reverseOrder()).forEach(leaf -> {
+            try {
+                Files.delete(leaf);
+            } catch (IOException e) {
+                LOGGER.error(format("Failed to delete '%s'", leaf), e);
+                throw new RuntimeException(format("Failed to delete '%s'", leaf), e);
+            }
+        });
+        Files.createDirectories(path.resolve("segments"));
     }
 }

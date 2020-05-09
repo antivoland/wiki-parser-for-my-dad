@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.WRITE;
+import static java.nio.file.StandardOpenOption.*;
 
 /**
  * @author antivoland
@@ -79,25 +78,23 @@ public class Table {
         private static final CsvMapper MAPPER = new CsvMapper();
 
         private final ObjectWriter writer;
-        private final String encoding;
+        private final Charset charset;
 
         public Exporter(Config config) {
             writer = MAPPER.writer(schema(config));
-            encoding = config.encoding;
+            charset = Charset.forName(config.encoding);
         }
 
         public void export(Table table, Path path) throws IOException {
             if (table.rows.isEmpty()) {
                 return;
             }
-            if (!Files.exists(path)) {
-                Files.createDirectories(path);
-            }
             List<String> serialized = new ArrayList<>(table.rows.size());
             for (Row row : table.rows.values()) {
                 serialized.add(writer.writeValueAsString(row.cellValues()));
             }
-            Files.write(path.resolve(table.name() + ".csv"), serialized, Charset.forName(encoding), WRITE, CREATE);
+            Files.write(path.resolve("segments").resolve(table.name() + ".csv"), serialized, charset, WRITE, CREATE);
+            Files.write(path.resolve("all.csv"), serialized, charset, WRITE, APPEND, CREATE);
         }
 
         private static CsvSchema schema(Config config) {

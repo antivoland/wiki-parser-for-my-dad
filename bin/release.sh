@@ -8,7 +8,7 @@ rm -rf $DIR/../release
 mkdir $DIR/../release
 
 cp $DIR/../target/$ARTIFACT_ID-$VERSION-jar-with-dependencies.jar $DIR/../release/extractor-$VERSION.jar
-cp $DIR/../src/main/resources/extractor.yml $DIR/../release
+cp $DIR/extractor-win.yml $DIR/../release/extractor.yml
 
 cat <<EOT >> $DIR/../release/run.bat
 chcp 65001
