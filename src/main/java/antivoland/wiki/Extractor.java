@@ -40,7 +40,7 @@ public class Extractor {
                     exporter.export(table, outPath);
                 } catch (IOException e) {
                     LOGGER.warn(format("Failed to export table #%s ('%s') from '%s'",
-                            table.no(), table.name(), profile.inUrl));
+                            table.no(), table.name(), profile.inUrl), e);
                 }
             });
             LOGGER.info(format("Exported tables from '%s' to '%s'", profile.inUrl, outPath));
